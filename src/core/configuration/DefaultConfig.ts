@@ -213,10 +213,10 @@ export class DefaultConfig implements Config {
     return 5;
   }
   carpetBombRadius(): number {
-    return 4;
+    return 9;
   }
   carpetBombSpacing(): number {
-    return 12;
+    return 18;
   }
   carpetBombLineLength(): number {
     return 40;
@@ -480,7 +480,7 @@ export class DefaultConfig implements Config {
         break;
       case UnitType.Paratrooper:
         info = {
-          cost: () => 0n,
+          cost: this.costWrapper(() => 50_000, UnitType.Paratrooper),
         };
         break;
       case UnitType.Train:
