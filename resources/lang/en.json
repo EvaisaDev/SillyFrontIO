@@ -27,7 +27,7 @@
     "map_default": "Map default"
   },
   "main": {
-    "title": "OpenFront (ALPHA)",
+    "title": "EbaFront (ALPHA)",
     "login_discord": "Login with Discord",
     "sign_in": "Sign in",
     "discord_avatar_alt": "Discord profile avatar",
@@ -494,7 +494,10 @@
     "atom_bomb": "Atom Bomb",
     "hydrogen_bomb": "Hydrogen Bomb",
     "mirv": "MIRV",
-    "factory": "Factory"
+    "factory": "Factory",
+    "airport": "Airport",
+    "carpet_bomb": "Carpet Bomb",
+    "paratrooper": "Paratroopers"
   },
   "user_setting": {
     "title": "Settings",
@@ -702,7 +705,10 @@
       "port": "Sends trade ships to generate gold",
       "defense_post": "Increases defenses of nearby borders",
       "city": "Increases max population",
-      "factory": "Creates railroads and spawns trains"
+      "factory": "Creates railroads and spawns trains",
+      "airport": "Enables Carpet Bomb and Paratrooper air attacks",
+      "carpet_bomb": "Sends a bomber that destroys tiles in a line",
+      "paratrooper": "Drops troops deep into enemy territory"
     },
     "not_enough_money": "Not enough money"
   },

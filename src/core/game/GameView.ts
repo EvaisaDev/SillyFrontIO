@@ -171,7 +171,9 @@ export class UnitView {
     const cooldownDuration =
       this.data.unitType === UnitType.SAMLauncher
         ? this.gameView.config().SAMCooldown()
-        : this.gameView.config().SiloCooldown();
+        : this.data.unitType === UnitType.Airport
+          ? this.gameView.config().AirportCooldown()
+          : this.gameView.config().SiloCooldown();
 
     for (const cooldown of this.data.missileTimerQueue) {
       const cooldownProgress = this.gameView.ticks() - cooldown;

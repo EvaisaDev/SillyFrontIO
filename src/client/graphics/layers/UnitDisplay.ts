@@ -16,7 +16,9 @@ import {
 import { renderNumber, translateText } from "../../Utils";
 import { UIState } from "../UIState";
 import { Layer } from "./Layer";
+import airportIcon from "/images/AirportIconWhite.svg?url";
 import warshipIcon from "/images/BattleshipIconWhite.svg?url";
+import carpetBombIcon from "/images/CarpetBombIconWhite.svg?url";
 import cityIcon from "/images/CityIconWhite.svg?url";
 import factoryIcon from "/images/FactoryIconWhite.svg?url";
 import goldCoinIcon from "/images/GoldCoinIcon.svg?url";
@@ -24,6 +26,7 @@ import mirvIcon from "/images/MIRVIcon.svg?url";
 import missileSiloIcon from "/images/MissileSiloIconWhite.svg?url";
 import hydrogenBombIcon from "/images/MushroomCloudIconWhite.svg?url";
 import atomBombIcon from "/images/NukeIconWhite.svg?url";
+import paratrooperIcon from "/images/ParatrooperIconWhite.svg?url";
 import portIcon from "/images/PortIcon.svg?url";
 import samLauncherIcon from "/images/SamLauncherIconWhite.svg?url";
 import defensePostIcon from "/images/ShieldIconWhite.svg?url";
@@ -42,6 +45,7 @@ export class UnitDisplay extends LitElement implements Layer {
   private _port = 0;
   private _defensePost = 0;
   private _samLauncher = 0;
+  private _airports = 0;
   private allDisabled = false;
   private _hoveredUnit: PlayerBuildableUnitType | null = null;
 
@@ -90,6 +94,14 @@ export class UnitDisplay extends LitElement implements Layer {
           this.cost(item) <= (player?.gold() ?? 0n) &&
           (player?.units(UnitType.Port).length ?? 0) > 0
         );
+      case UnitType.CarpetBomber:
+      case UnitType.Paratrooper:
+        return (
+          this.cost(item) <= (player?.gold() ?? 0n) &&
+          (player
+            ?.units(UnitType.Airport)
+            .filter((a) => !a.isUnderConstruction()).length ?? 0) > 0
+        );
       default:
         return this.cost(item) <= (player?.gold() ?? 0n);
     }
@@ -106,6 +118,7 @@ export class UnitDisplay extends LitElement implements Layer {
     this._port = player.totalUnitLevels(UnitType.Port);
     this._defensePost = player.totalUnitLevels(UnitType.DefensePost);
     this._samLauncher = player.totalUnitLevels(UnitType.SAMLauncher);
+    this._airports = player.totalUnitLevels(UnitType.Airport);
     this._factories = player.totalUnitLevels(UnitType.Factory);
     this._warships = player.totalUnitLevels(UnitType.Warship);
     this.requestUpdate();
@@ -173,6 +186,13 @@ export class UnitDisplay extends LitElement implements Layer {
               "sam_launcher",
               this.keybinds["buildSamLauncher"]?.key ?? "6",
             )}
+            ${this.renderUnitItem(
+              airportIcon,
+              this._airports,
+              UnitType.Airport,
+              "airport",
+              this.keybinds["buildAirport"]?.key ?? "",
+            )}
           </div>
         </div>
         <div class="bg-gray-800/70 backdrop-blur-xs rounded-lg p-0.5 w-fit">
@@ -204,6 +224,20 @@ export class UnitDisplay extends LitElement implements Layer {
               UnitType.MIRV,
               "mirv",
               this.keybinds["buildMIRV"]?.key ?? "0",
+            )}
+            ${this.renderUnitItem(
+              carpetBombIcon,
+              null,
+              UnitType.CarpetBomber,
+              "carpet_bomb",
+              this.keybinds["buildCarpetBomb"]?.key ?? "",
+            )}
+            ${this.renderUnitItem(
+              paratrooperIcon,
+              null,
+              UnitType.Paratrooper,
+              "paratrooper",
+              this.keybinds["buildParatrooper"]?.key ?? "",
             )}
           </div>
         </div>

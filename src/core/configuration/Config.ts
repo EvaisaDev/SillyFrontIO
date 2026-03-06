@@ -170,6 +170,11 @@ export interface Config {
   structureMinDist(): number;
   isReplay(): boolean;
   allianceExtensionPromptOffset(): number;
+  AirportCooldown(): number;
+  airplaneSpeed(): number;
+  carpetBombRadius(): number;
+  carpetBombSpacing(): number;
+  carpetBombLineLength(): number;
 }
 
 export interface Theme {

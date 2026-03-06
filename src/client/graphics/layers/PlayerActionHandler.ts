@@ -7,11 +7,13 @@ import {
   SendAttackIntentEvent,
   SendBoatAttackIntentEvent,
   SendBreakAllianceIntentEvent,
+  SendCarpetBombIntentEvent,
   SendDeleteUnitIntentEvent,
   SendDonateGoldIntentEvent,
   SendDonateTroopsIntentEvent,
   SendEmbargoIntentEvent,
   SendEmojiIntentEvent,
+  SendParatrooperIntentEvent,
   SendSpawnIntentEvent,
   SendTargetPlayerIntentEvent,
 } from "../../Transport";
@@ -92,5 +94,18 @@ export class PlayerActionHandler {
 
   handleDeleteUnit(unitId: number) {
     this.eventBus.emit(new SendDeleteUnitIntentEvent(unitId));
+  }
+
+  handleCarpetBomb(targetTile: TileRef) {
+    this.eventBus.emit(new SendCarpetBombIntentEvent(targetTile));
+  }
+
+  handleParatrooper(player: PlayerView, targetTile: TileRef) {
+    this.eventBus.emit(
+      new SendParatrooperIntentEvent(
+        targetTile,
+        this.uiState.attackRatio * player.troops(),
+      ),
+    );
   }
 }

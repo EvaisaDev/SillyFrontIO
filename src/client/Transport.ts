@@ -81,6 +81,17 @@ export class SendBoatAttackIntentEvent implements GameEvent {
   ) {}
 }
 
+export class SendCarpetBombIntentEvent implements GameEvent {
+  constructor(public readonly dst: TileRef) {}
+}
+
+export class SendParatrooperIntentEvent implements GameEvent {
+  constructor(
+    public readonly dst: TileRef,
+    public readonly troops: number,
+  ) {}
+}
+
 export class BuildUnitIntentEvent implements GameEvent {
   constructor(
     public readonly unit: UnitType,
@@ -253,6 +264,13 @@ export class Transport {
 
     this.eventBus.on(SendDeleteUnitIntentEvent, (e) =>
       this.onSendDeleteUnitIntent(e),
+    );
+
+    this.eventBus.on(SendCarpetBombIntentEvent, (e) =>
+      this.onSendCarpetBombIntent(e),
+    );
+    this.eventBus.on(SendParatrooperIntentEvent, (e) =>
+      this.onSendParatrooperIntent(e),
     );
 
     this.eventBus.on(SendKickPlayerIntentEvent, (e) =>
@@ -485,6 +503,21 @@ export class Transport {
       type: "boat",
       troops: event.troops,
       dst: event.dst,
+    });
+  }
+
+  private onSendCarpetBombIntent(event: SendCarpetBombIntentEvent) {
+    this.sendIntent({
+      type: "carpet_bomb",
+      dst: event.dst,
+    });
+  }
+
+  private onSendParatrooperIntent(event: SendParatrooperIntentEvent) {
+    this.sendIntent({
+      type: "paratrooper",
+      dst: event.dst,
+      troops: event.troops,
     });
   }
 

@@ -8,6 +8,7 @@ import { Cell, UnitType } from "../../../core/game/Game";
 import { euclDistFN, isometricDistFN } from "../../../core/game/GameMap";
 import { GameUpdateType } from "../../../core/game/GameUpdates";
 import { GameView, UnitView } from "../../../core/game/GameView";
+import airportIcon from "/images/buildings/airport1.png?url";
 import cityIcon from "/images/buildings/cityAlt1.png?url";
 import factoryIcon from "/images/buildings/factoryAlt1.png?url";
 import shieldIcon from "/images/buildings/fortAlt3.png?url";
@@ -66,6 +67,11 @@ export class StructureLayer implements Layer {
     },
     [UnitType.SAMLauncher]: {
       icon: SAMMissileIcon,
+      borderRadius: BASE_BORDER_RADIUS * RADIUS_SCALE_FACTOR,
+      territoryRadius: BASE_TERRITORY_RADIUS * RADIUS_SCALE_FACTOR,
+    },
+    [UnitType.Airport]: {
+      icon: airportIcon,
       borderRadius: BASE_BORDER_RADIUS * RADIUS_SCALE_FACTOR,
       territoryRadius: BASE_TERRITORY_RADIUS * RADIUS_SCALE_FACTOR,
     },

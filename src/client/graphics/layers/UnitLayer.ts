@@ -348,6 +348,10 @@ export class UnitLayer implements Layer {
       case UnitType.MIRVWarhead:
         this.handleMIRVWarhead(unit);
         break;
+      case UnitType.CarpetBomber:
+      case UnitType.Paratrooper:
+        this.handleAirplane(unit);
+        break;
       case UnitType.AtomBomb:
       case UnitType.HydrogenBomb:
       case UnitType.MIRV:
@@ -507,6 +511,46 @@ export class UnitLayer implements Layer {
     this.drawSprite(unit);
   }
 
+  private handleAirplane(unit: UnitView) {
+    const rel = this.relationship(unit);
+
+    if (!this.unitToTrail.has(unit)) {
+      this.unitToTrail.set(unit, []);
+    }
+
+    let newTrailSize = 1;
+    const trail = this.unitToTrail.get(unit) ?? [];
+    if (trail.length >= 1) {
+      const cur = {
+        x: this.game.x(unit.lastTile()),
+        y: this.game.y(unit.lastTile()),
+      };
+      const prev = {
+        x: this.game.x(trail[trail.length - 1]),
+        y: this.game.y(trail[trail.length - 1]),
+      };
+      const line = new BezenhamLine(prev, cur);
+      let point = line.increment();
+      while (point !== true) {
+        trail.push(this.game.ref(point.x, point.y));
+        point = line.increment();
+      }
+      newTrailSize = line.size();
+    } else {
+      trail.push(unit.lastTile());
+    }
+
+    this.drawTrail(
+      trail.slice(-newTrailSize),
+      unit.owner().territoryColor(),
+      rel,
+    );
+    this.drawRotatedSprite(unit);
+    if (!unit.isActive()) {
+      this.clearTrail(unit);
+    }
+  }
+
   private handleBoatEvent(unit: UnitView) {
     const rel = this.relationship(unit);
 
@@ -616,6 +660,33 @@ export class UnitLayer implements Layer {
       if (!targetable) {
         this.context.restore();
       }
+    }
+  }
+
+  drawRotatedSprite(unit: UnitView, customTerritoryColor?: Colord) {
+    const x = this.game.x(unit.tile());
+    const y = this.game.y(unit.tile());
+    const lastX = this.game.x(unit.lastTile());
+    const lastY = this.game.y(unit.lastTile());
+
+    const dx = x - lastX;
+    const dy = y - lastY;
+    const angle = dx === 0 && dy === 0 ? 0 : Math.atan2(dy, dx);
+
+    const sprite = getColoredSprite(unit, this.theme, customTerritoryColor);
+
+    if (unit.isActive()) {
+      this.context.save();
+      this.context.translate(x, y);
+      this.context.rotate(angle);
+      this.context.drawImage(
+        sprite,
+        Math.round(-sprite.width / 2),
+        Math.round(-sprite.height / 2),
+        sprite.width,
+        sprite.height,
+      );
+      this.context.restore();
     }
   }
 }

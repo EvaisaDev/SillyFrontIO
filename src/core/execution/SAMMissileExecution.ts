@@ -42,13 +42,17 @@ export class SAMMissileExecution implements Execution {
       this.active = false;
       return;
     }
-    // Mirv warheads are too fast, and mirv shouldn't be stopped ever
-    const nukesWhitelist = [UnitType.AtomBomb, UnitType.HydrogenBomb];
+    const targetWhitelist = [
+      UnitType.AtomBomb,
+      UnitType.HydrogenBomb,
+      UnitType.CarpetBomber,
+      UnitType.Paratrooper,
+    ];
     if (
       !this.target.isActive() ||
       !this.ownerUnit.isActive() ||
       this.target.owner() === this.SAMMissile.owner() ||
-      !nukesWhitelist.includes(this.target.type())
+      !targetWhitelist.includes(this.target.type())
     ) {
       // Clear the flag so other SAMs can re-target this nuke
       if (this.target.isActive()) {
@@ -59,9 +63,14 @@ export class SAMMissileExecution implements Execution {
       return;
     }
     for (let i = 0; i < this.speed; i++) {
+      const currentTarget =
+        this.target.type() === UnitType.CarpetBomber ||
+        this.target.type() === UnitType.Paratrooper
+          ? this.target.tile()
+          : this.targetTile;
       const result = this.pathFinder.next(
         this.SAMMissile.tile(),
-        this.targetTile,
+        currentTarget,
       );
       if (result.status === PathStatus.COMPLETE) {
         this.mg.displayMessage(

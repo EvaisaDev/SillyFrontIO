@@ -7,6 +7,7 @@ import {
 } from "../../../core/game/Game";
 import { GameView, PlayerView, UnitView } from "../../../core/game/GameView";
 import { TransformHandler } from "../TransformHandler";
+import airportIcon from "/images/AirportIconWhite.svg?url";
 import anchorIcon from "/images/AnchorIcon.png?url";
 import cityIcon from "/images/CityIcon.png?url";
 import factoryIcon from "/images/FactoryUnit.png?url";
@@ -21,10 +22,13 @@ export const STRUCTURE_SHAPES: Partial<Record<UnitType, ShapeType>> = {
   [UnitType.DefensePost]: "octagon",
   [UnitType.SAMLauncher]: "square",
   [UnitType.MissileSilo]: "triangle",
+  [UnitType.Airport]: "square",
   [UnitType.Warship]: "cross",
   [UnitType.AtomBomb]: "cross",
   [UnitType.HydrogenBomb]: "cross",
   [UnitType.MIRV]: "cross",
+  [UnitType.CarpetBomber]: "cross",
+  [UnitType.Paratrooper]: "cross",
 };
 export const LEVEL_SCALE_FACTOR = 3;
 export const ICON_SCALE_FACTOR_ZOOMED_IN = 3.5;
@@ -66,6 +70,7 @@ export class SpriteFactory {
     [UnitType.Port, { iconPath: anchorIcon, image: null }],
     [UnitType.MissileSilo, { iconPath: missileSiloIcon, image: null }],
     [UnitType.SAMLauncher, { iconPath: SAMMissileIcon, image: null }],
+    [UnitType.Airport, { iconPath: airportIcon, image: null }],
   ]);
   constructor(
     theme: Theme,
@@ -424,7 +429,12 @@ export class SpriteFactory {
         circle: [6, 6],
         cross: [0, 0],
       };
-      const [offsetX, offsetY] = SHAPE_OFFSETS[shape] || [0, 0];
+      const [offsetX, offsetY] =
+        structureType === UnitType.Airport
+          ? [2, 2]
+          : SHAPE_OFFSETS[shape] || [0, 0];
+      const drawWidth = iconSize - 2 * offsetX;
+      const drawHeight = iconSize - 2 * offsetY;
       context.drawImage(
         this.getImageColored(
           structureInfo.image,
@@ -432,6 +442,8 @@ export class SpriteFactory {
         ),
         offsetX,
         offsetY,
+        drawWidth,
+        drawHeight,
       );
     }
 

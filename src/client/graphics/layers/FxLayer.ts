@@ -26,6 +26,7 @@ export class FxLayer implements Layer {
 
   private allFx: Fx[] = [];
   private hasBufferedFrame = false;
+  private readonly carpetBomberLastExplosion: Map<number, TileRef> = new Map();
 
   constructor(
     private game: GameView,
@@ -67,6 +68,9 @@ export class FxLayer implements Layer {
       case UnitType.MIRVWarhead:
         this.onNukeEvent(unit, 70);
         break;
+      case UnitType.CarpetBomber:
+        this.onCarpetBomberEvent(unit);
+        break;
       case UnitType.HydrogenBomb: {
         this.onNukeEvent(unit, 160);
         break;
@@ -105,6 +109,39 @@ export class FxLayer implements Layer {
         this.allFx.push(explosion);
       }
     }
+  }
+
+  onCarpetBomberEvent(unit: UnitView) {
+    if (!unit.isActive()) {
+      this.carpetBomberLastExplosion.delete(unit.id());
+      return;
+    }
+    if (unit.tile() === unit.lastTile()) return;
+    const spacing = this.game.config().carpetBombSpacing();
+    const lastTile = this.carpetBomberLastExplosion.get(unit.id());
+    if (lastTile !== undefined) {
+      const dx = this.game.x(unit.tile()) - this.game.x(lastTile);
+      const dy = this.game.y(unit.tile()) - this.game.y(lastTile);
+      if (dx * dx + dy * dy < spacing * spacing) return;
+    }
+    if (unit.targetTile() === undefined) return;
+    const tgt = unit.targetTile()!;
+    const tdx = this.game.x(tgt) - this.game.x(unit.tile());
+    const tdy = this.game.y(tgt) - this.game.y(unit.tile());
+    const lineLength = this.game.config().carpetBombLineLength();
+    const distToTarget = Math.sqrt(tdx * tdx + tdy * tdy);
+    if (distToTarget > lineLength) return;
+    this.carpetBomberLastExplosion.set(unit.id(), unit.tile());
+    const x = this.game.x(unit.tile());
+    const y = this.game.y(unit.tile());
+    const nukeFx = nukeFxFactory(
+      this.animatedSpriteLoader,
+      x,
+      y,
+      70,
+      this.game,
+    );
+    this.allFx = this.allFx.concat(nukeFx);
   }
 
   onTrainEvent(unit: UnitView) {

@@ -1,0 +1,96 @@
+{
+  "map": {
+    "height": 1024,
+    "num_land_tiles": 445994,
+    "width": 1024
+  },
+  "map16x": {
+    "height": 256,
+    "num_land_tiles": 23372,
+    "width": 256
+  },
+  "map4x": {
+    "height": 512,
+    "num_land_tiles": 105099,
+    "width": 512
+  },
+  "name": "Xytio",
+  "nations": [
+    {
+      "coordinates": [176, 112],
+      "name": "Penisland"
+    },
+    {
+      "coordinates": [496, 96],
+      "name": "Shrekoslavakia"
+    },
+    {
+      "coordinates": [656, 144],
+      "name": "Far far away"
+    },
+    {
+      "coordinates": [848, 144],
+      "name": "The Bogswamp"
+    },
+    {
+      "coordinates": [400, 208],
+      "name": "Fairtale"
+    },
+    {
+      "coordinates": [656, 240],
+      "name": "Onionistan"
+    },
+    {
+      "coordinates": [336, 336],
+      "name": "Swampendankdaddyville"
+    },
+    {
+      "coordinates": [528, 336],
+      "name": "Donkeyvania"
+    },
+    {
+      "coordinates": [688, 336],
+      "name": "Duloc"
+    },
+    {
+      "coordinates": [976, 400],
+      "name": "Shreclvania"
+    },
+    {
+      "coordinates": [400, 464],
+      "name": "Shrexico"
+    },
+    {
+      "coordinates": [624, 464],
+      "name": "Swamptopia"
+    },
+    {
+      "coordinates": [272, 592],
+      "name": "Ownyownville"
+    },
+    {
+      "coordinates": [528, 592],
+      "name": "Shrekiana"
+    },
+    {
+      "coordinates": [400, 720],
+      "name": "St. Swamplouise"
+    },
+    {
+      "coordinates": [880, 624],
+      "name": "Fionation"
+    },
+    {
+      "coordinates": [784, 816],
+      "name": "farquaadia"
+    },
+    {
+      "coordinates": [272, 848],
+      "name": "Donkiev"
+    },
+    {
+      "coordinates": [624, 912],
+      "name": "Fionia"
+    }
+  ]
+}

@@ -2,6 +2,7 @@ import { Colord } from "colord";
 import { Theme } from "../../core/configuration/Config";
 import { TrainType, UnitType } from "../../core/game/Game";
 import { UnitView } from "../../core/game/GameView";
+import airplaneSprite from "/sprites/airplane.png?url";
 import atomBombSprite from "/sprites/atombomb.png?url";
 import hydrogenBombSprite from "/sprites/hydrogenbomb.png?url";
 import mirvSprite from "/sprites/mirv2.png?url";
@@ -30,6 +31,8 @@ const SPRITE_CONFIG: Partial<Record<UnitType | TrainTypeSprite, string>> = {
   [UnitType.HydrogenBomb]: hydrogenBombSprite,
   [UnitType.TradeShip]: tradeShipSprite,
   [UnitType.MIRV]: mirvSprite,
+  [UnitType.CarpetBomber]: airplaneSprite,
+  [UnitType.Paratrooper]: airplaneSprite,
   [TrainTypeSprite.Engine]: trainEngineSprite,
   [TrainTypeSprite.Carriage]: trainCarriageSprite,
   [TrainTypeSprite.LoadedCarriage]: trainLoadedCarriageSprite,

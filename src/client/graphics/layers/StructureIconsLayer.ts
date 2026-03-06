@@ -24,6 +24,8 @@ import {
 } from "../../InputHandler";
 import {
   BuildUnitIntentEvent,
+  SendCarpetBombIntentEvent,
+  SendParatrooperIntentEvent,
   SendUpgradeStructureIntentEvent,
 } from "../../Transport";
 import { renderNumber } from "../../Utils";
@@ -422,17 +424,31 @@ export class StructureIconsLayer implements Layer {
       );
     } else if (this.ghostUnit.buildableUnit.canBuild) {
       const unitType = this.ghostUnit.buildableUnit.type;
-      const rocketDirectionUp =
-        unitType === UnitType.AtomBomb || unitType === UnitType.HydrogenBomb
-          ? this.uiState.rocketDirectionUp
-          : undefined;
-      this.eventBus.emit(
-        new BuildUnitIntentEvent(
-          unitType,
-          this.game.ref(tile.x, tile.y),
-          rocketDirectionUp,
-        ),
-      );
+      if (unitType === UnitType.CarpetBomber) {
+        this.eventBus.emit(
+          new SendCarpetBombIntentEvent(this.game.ref(tile.x, tile.y)),
+        );
+      } else if (unitType === UnitType.Paratrooper) {
+        const player = this.game.myPlayer();
+        this.eventBus.emit(
+          new SendParatrooperIntentEvent(
+            this.game.ref(tile.x, tile.y),
+            player ? Math.floor(Number(player.troops()) * 0.5) : 0,
+          ),
+        );
+      } else {
+        const rocketDirectionUp =
+          unitType === UnitType.AtomBomb || unitType === UnitType.HydrogenBomb
+            ? this.uiState.rocketDirectionUp
+            : undefined;
+        this.eventBus.emit(
+          new BuildUnitIntentEvent(
+            unitType,
+            this.game.ref(tile.x, tile.y),
+            rocketDirectionUp,
+          ),
+        );
+      }
     }
     this.removeGhostStructure();
   }

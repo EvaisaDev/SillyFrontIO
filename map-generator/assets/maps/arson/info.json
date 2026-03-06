@@ -1,0 +1,37 @@
+{
+  "name": "Arson",
+  "nations": [
+    {
+      "coordinates": [250, 150],
+      "name": "Ebatopia"
+    },
+    {
+      "coordinates": [1650, 350],
+      "name": "Arsony"
+    },
+    {
+      "coordinates": [650, 600],
+      "name": "Explodia"
+    },
+    {
+      "coordinates": [1200, 700],
+      "name": "Plutonia"
+    },
+    {
+      "coordinates": [350, 1000],
+      "name": "Ebaland"
+    },
+    {
+      "coordinates": [900, 1200],
+      "name": "Ivy Coast"
+    },
+    {
+      "coordinates": [1500, 1100],
+      "name": "Critterland"
+    },
+    {
+      "coordinates": [1500, 1700],
+      "name": "Yippee"
+    }
+  ]
+}

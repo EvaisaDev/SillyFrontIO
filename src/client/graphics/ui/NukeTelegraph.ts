@@ -16,8 +16,13 @@ export class CircleArea implements UIElement {
   private readonly baseAlpha = 0.9;
   private readonly cell: Cell;
   private readonly animationDuration = 150;
-  protected ended: boolean = false;
+  ended: boolean = false;
   protected lifeTime: number = 0;
+
+  end() {
+    this.ended = true;
+    this.lifeTime = 0;
+  }
 
   constructor(
     private transformHandler: TransformHandler,
@@ -109,5 +114,65 @@ export class NukeTelegraph extends CircleArea {
       this.lifeTime = 0; // reset lifetime to reuse animation logic
     }
     return super.render(ctx, delta);
+  }
+}
+
+export class CarpetBomberTelegraph implements UIElement {
+  private readonly circles: CircleArea[];
+
+  constructor(
+    transformHandler: TransformHandler,
+    game: GameView,
+    private readonly unit: UnitView,
+  ) {
+    const target = unit.targetTile();
+    if (target === undefined) {
+      this.circles = [];
+      return;
+    }
+
+    const config = game.config();
+    const lineLength = config.carpetBombLineLength();
+    const spacing = config.carpetBombSpacing();
+    const radius = config.carpetBombRadius();
+    const overshoot = lineLength / 2;
+
+    const srcX = game.x(unit.tile());
+    const srcY = game.y(unit.tile());
+    const dstX = game.x(target);
+    const dstY = game.y(target);
+
+    const dx = dstX - srcX;
+    const dy = dstY - srcY;
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    const dirX = dx / dist;
+    const dirY = dy / dist;
+
+    const endX = dstX + dirX * overshoot;
+    const endY = dstY + dirY * overshoot;
+    const totalLen = Math.sqrt((endX - srcX) ** 2 + (endY - srcY) ** 2);
+    const bombStartDist = Math.max(0, totalLen - lineLength);
+
+    this.circles = [];
+    for (let d = bombStartDist; d <= totalLen + 0.5; d += spacing) {
+      const bx = srcX + dirX * d;
+      const by = srcY + dirY * d;
+      this.circles.push(
+        new CircleArea(transformHandler, bx, by, radius, radius * 2),
+      );
+    }
+  }
+
+  render(ctx: CanvasRenderingContext2D, delta: number): boolean {
+    if (!this.unit.isActive()) {
+      for (const c of this.circles) {
+        if (!c.ended) c.end();
+      }
+    }
+    let anyAlive = false;
+    for (const c of this.circles) {
+      if (c.render(ctx, delta)) anyAlive = true;
+    }
+    return anyAlive;
   }
 }

@@ -1166,7 +1166,11 @@ export class PlayerImpl implements Player {
       case UnitType.SAMLauncher:
       case UnitType.City:
       case UnitType.Factory:
+      case UnitType.Airport:
         return this.landBasedStructureSpawn(targetTile, validTiles);
+      case UnitType.CarpetBomber:
+      case UnitType.Paratrooper:
+        return this.airplaneSpawn(targetTile);
       default:
         assertNever(unitType);
     }
@@ -1244,6 +1248,18 @@ export class PlayerImpl implements Player {
         this.mg.manhattanDist(a.tile(), tile) -
         this.mg.manhattanDist(b.tile(), tile),
     );
+    if (spawns.length === 0) {
+      return false;
+    }
+    return spawns[0].tile();
+  }
+
+  airplaneSpawn(tile: TileRef): TileRef | false {
+    const spawns = this.units(UnitType.Airport)
+      .filter((airport) => {
+        return !airport.isInCooldown() && !airport.isUnderConstruction();
+      })
+      .sort(distSortUnit(this.mg, tile));
     if (spawns.length === 0) {
       return false;
     }

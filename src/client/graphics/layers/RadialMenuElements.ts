@@ -23,11 +23,13 @@ import { EventBus } from "../../../core/EventBus";
 import allianceIcon from "/images/AllianceIconWhite.svg?url";
 import boatIcon from "/images/BoatIconWhite.svg?url";
 import buildIcon from "/images/BuildIconWhite.svg?url";
+import carpetBombIcon from "/images/CarpetBombIconWhite.svg?url";
 import chatIcon from "/images/ChatIconWhite.svg?url";
 import donateGoldIcon from "/images/DonateGoldIconWhite.svg?url";
 import donateTroopIcon from "/images/DonateTroopIconWhite.svg?url";
 import emojiIcon from "/images/EmojiIconWhite.svg?url";
 import infoIcon from "/images/InfoIcon.svg?url";
+import paratrooperIcon from "/images/ParatrooperIconWhite.svg?url";
 import swordIcon from "/images/SwordIconWhite.svg?url";
 import targetIcon from "/images/TargetIconWhite.svg?url";
 import traitorIcon from "/images/TraitorIconWhite.svg?url";
@@ -85,6 +87,7 @@ export const COLORS = {
   build: "#ebe250",
   building: "#2c2c2c",
   boat: "#3f6ab1",
+  air: "#5b8dcf",
   ally: "#53ac75",
   breakAlly: "#c74848",
   breakAllyNoDebuff: "#d4882b",
@@ -473,7 +476,74 @@ export const attackMenuElement: MenuElement = {
 
   subMenu: (params: MenuElementParams) => {
     if (params === undefined) return [];
-    return createMenuElements(params, "attack", "attack");
+    const elements = createMenuElements(params, "attack", "attack");
+
+    const hasAirport =
+      params.myPlayer
+        .units(UnitType.Airport)
+        .filter((a) => !a.isUnderConstruction()).length > 0;
+
+    if (hasAirport && !params.game.config().isUnitDisabled(UnitType.Airport)) {
+      const carpetBombCost = params.game
+        .config()
+        .unitInfo(UnitType.CarpetBomber)
+        .cost(params.game as any, params.myPlayer as any);
+
+      const canAffordCarpetBomb = params.myPlayer.gold() >= carpetBombCost;
+
+      elements.push({
+        id: "attack_carpet_bomb",
+        name: "carpet_bomb",
+        disabled: () => !canAffordCarpetBomb,
+        color: canAffordCarpetBomb ? COLORS.air : undefined,
+        icon: carpetBombIcon,
+        tooltipItems: [
+          {
+            text: translateText("unit_type.carpet_bomb"),
+            className: "title",
+          },
+          {
+            text: translateText("build_menu.desc.carpet_bomb"),
+            className: "description",
+          },
+          {
+            text: `${renderNumber(carpetBombCost)} ${translateText("player_panel.gold")}`,
+            className: "cost",
+          },
+        ],
+        action: (params: MenuElementParams) => {
+          params.playerActionHandler.handleCarpetBomb(params.tile);
+          params.closeMenu();
+        },
+      });
+
+      elements.push({
+        id: "attack_paratrooper",
+        name: "paratrooper",
+        disabled: () => false,
+        color: COLORS.air,
+        icon: paratrooperIcon,
+        tooltipItems: [
+          {
+            text: translateText("unit_type.paratrooper"),
+            className: "title",
+          },
+          {
+            text: translateText("build_menu.desc.paratrooper"),
+            className: "description",
+          },
+        ],
+        action: (params: MenuElementParams) => {
+          params.playerActionHandler.handleParatrooper(
+            params.myPlayer,
+            params.tile,
+          );
+          params.closeMenu();
+        },
+      });
+    }
+
+    return elements;
   },
 };
 

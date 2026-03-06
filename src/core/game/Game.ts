@@ -136,6 +136,7 @@ export enum GameMapType {
   Hawaii = "Hawaii",
   Alps = "Alps",
   NileDelta = "Nile Delta",
+  Arson = "Arson",
 }
 
 export type GameMapName = keyof typeof GameMapType;
@@ -202,6 +203,7 @@ export const mapCategories: Record<string, GameMapType[]> = {
     GameMapType.Surrounded,
     GameMapType.TradersDream,
     GameMapType.Passage,
+    GameMapType.Arson,
   ],
   arcade: [
     GameMapType.TheBox,
@@ -278,6 +280,9 @@ export enum UnitType {
   MIRVWarhead = "MIRV Warhead",
   Train = "Train",
   Factory = "Factory",
+  Airport = "Airport",
+  CarpetBomber = "Carpet Bomber",
+  Paratrooper = "Paratrooper",
 }
 
 export enum TrainType {
@@ -298,6 +303,8 @@ export const BuildableAttacks = unitTypeGroup([
   UnitType.HydrogenBomb,
   UnitType.MIRV,
   UnitType.Warship,
+  UnitType.CarpetBomber,
+  UnitType.Paratrooper,
 ] as const);
 
 export const Structures = unitTypeGroup([
@@ -307,6 +314,7 @@ export const Structures = unitTypeGroup([
   UnitType.MissileSilo,
   UnitType.Port,
   UnitType.Factory,
+  UnitType.Airport,
 ] as const);
 
 export const BuildMenus = unitTypeGroup([
@@ -382,6 +390,17 @@ export interface UnitParamsMap {
 
   [UnitType.MIRVWarhead]: {
     targetTile?: number;
+  };
+
+  [UnitType.Airport]: Record<string, never>;
+
+  [UnitType.CarpetBomber]: {
+    targetTile?: TileRef;
+  };
+
+  [UnitType.Paratrooper]: {
+    targetTile?: TileRef;
+    troops?: number;
   };
 }
 

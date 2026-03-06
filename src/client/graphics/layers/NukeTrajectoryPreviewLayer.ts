@@ -50,7 +50,9 @@ export class NukeTrajectoryPreviewLayer implements Layer {
       // Clear trajectory if ghost structure changed
       if (
         e.ghostStructure !== UnitType.AtomBomb &&
-        e.ghostStructure !== UnitType.HydrogenBomb
+        e.ghostStructure !== UnitType.HydrogenBomb &&
+        e.ghostStructure !== UnitType.CarpetBomber &&
+        e.ghostStructure !== UnitType.Paratrooper
       ) {
         this.trajectoryPoints = [];
         this.lastTargetTile = null;
@@ -72,6 +74,7 @@ export class NukeTrajectoryPreviewLayer implements Layer {
     // Update trajectory path each frame for smooth responsiveness
     this.updateTrajectoryPath();
     this.drawTrajectoryPreview(context);
+    this.drawAirplanePreview(context);
   }
 
   /**
@@ -83,10 +86,18 @@ export class NukeTrajectoryPreviewLayer implements Layer {
     const isNukeType =
       ghostStructure === UnitType.AtomBomb ||
       ghostStructure === UnitType.HydrogenBomb;
+    const isAirplane =
+      ghostStructure === UnitType.CarpetBomber ||
+      ghostStructure === UnitType.Paratrooper;
 
-    // Clear trajectory if not a nuke type
-    if (!isNukeType) {
+    // Clear trajectory if not a nuke type or airplane
+    if (!isNukeType && !isAirplane) {
       this.cachedSpawnTile = null;
+      return;
+    }
+
+    if (isAirplane) {
+      this.updateAirplanePreview(ghostStructure);
       return;
     }
 
@@ -178,9 +189,17 @@ export class NukeTrajectoryPreviewLayer implements Layer {
     const isNukeType =
       ghostStructure === UnitType.AtomBomb ||
       ghostStructure === UnitType.HydrogenBomb;
+    const isAirplane =
+      ghostStructure === UnitType.CarpetBomber ||
+      ghostStructure === UnitType.Paratrooper;
 
     // Clear trajectory if not a nuke type or no cached spawn tile
-    if (!isNukeType || !this.cachedSpawnTile) {
+    if ((!isNukeType && !isAirplane) || !this.cachedSpawnTile) {
+      this.trajectoryPoints = [];
+      return;
+    }
+
+    if (isAirplane) {
       this.trajectoryPoints = [];
       return;
     }
@@ -446,6 +465,187 @@ export class NukeTrajectoryPreviewLayer implements Layer {
     }
 
     outlineAndStroke();
+    context.restore();
+  }
+
+  private updateAirplanePreview(ghostStructure: UnitType) {
+    const now = performance.now();
+    if (now - this.lastTrajectoryUpdate < 50) return;
+    this.lastTrajectoryUpdate = now;
+
+    const player = this.game.myPlayer();
+    if (!player) {
+      this.cachedSpawnTile = null;
+      return;
+    }
+
+    const rect = this.transformHandler.boundingRect();
+    if (!rect) {
+      this.cachedSpawnTile = null;
+      return;
+    }
+
+    const localX = this.mousePos.x - rect.left;
+    const localY = this.mousePos.y - rect.top;
+    const worldCoords = this.transformHandler.screenToWorldCoordinates(
+      localX,
+      localY,
+    );
+    if (!this.game.isValidCoord(worldCoords.x, worldCoords.y)) {
+      this.cachedSpawnTile = null;
+      return;
+    }
+
+    const targetTile = this.game.ref(worldCoords.x, worldCoords.y);
+    if (this.lastTargetTile === targetTile) return;
+    this.lastTargetTile = targetTile;
+
+    player
+      .buildables(targetTile, [ghostStructure])
+      .then((buildables) => {
+        if (this.lastTargetTile !== targetTile) return;
+        const bu = buildables.find((b) => b.type === ghostStructure);
+        if (!bu || bu.canBuild === false) {
+          this.cachedSpawnTile = null;
+          return;
+        }
+        this.cachedSpawnTile = bu.canBuild as TileRef;
+      })
+      .catch(() => {
+        this.cachedSpawnTile = null;
+      });
+  }
+
+  private drawAirplanePreview(context: CanvasRenderingContext2D) {
+    const ghostStructure = this.currentGhostStructure;
+    const isAirplane =
+      ghostStructure === UnitType.CarpetBomber ||
+      ghostStructure === UnitType.Paratrooper;
+    if (!isAirplane || !this.cachedSpawnTile || !this.lastTargetTile) return;
+
+    const rect = this.transformHandler.boundingRect();
+    if (!rect) return;
+    const localX = this.mousePos.x - rect.left;
+    const localY = this.mousePos.y - rect.top;
+    const worldCoords = this.transformHandler.screenToWorldCoordinates(
+      localX,
+      localY,
+    );
+    if (!this.game.isValidCoord(worldCoords.x, worldCoords.y)) return;
+
+    const targetTile = this.game.ref(worldCoords.x, worldCoords.y);
+    const srcX = this.game.x(this.cachedSpawnTile);
+    const srcY = this.game.y(this.cachedSpawnTile);
+    const dstX = this.game.x(targetTile);
+    const dstY = this.game.y(targetTile);
+
+    const dx = dstX - srcX;
+    const dy = dstY - srcY;
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    const steps = Math.ceil(dist);
+
+    const offsetX = -this.game.width() / 2;
+    const offsetY = -this.game.height() / 2;
+
+    let samInterceptX: number | null = null;
+    let samInterceptY: number | null = null;
+
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const tx = Math.round(srcX + dx * t);
+      const ty = Math.round(srcY + dy * t);
+      if (!this.game.isValidCoord(tx, ty)) continue;
+      const tile = this.game.ref(tx, ty);
+      for (const sam of this.game.nearbyUnits(
+        tile,
+        this.game.config().maxSamRange(),
+        UnitType.SAMLauncher,
+      )) {
+        const samOwner = sam.unit.owner();
+        const myPlayer = this.game.myPlayer();
+        if (samOwner.isMe() || (myPlayer && myPlayer.isFriendly(samOwner)))
+          continue;
+        if (
+          sam.distSquared <=
+          this.game.config().samRange(sam.unit.level()) ** 2
+        ) {
+          samInterceptX = tx + offsetX;
+          samInterceptY = ty + offsetY;
+          break;
+        }
+      }
+      if (samInterceptX !== null) break;
+    }
+
+    const targeted = samInterceptX !== null;
+    const lineColor = targeted
+      ? "rgba(255, 80, 80, 1)"
+      : "rgba(255, 255, 255, 1)";
+    const outlineColor = targeted
+      ? "rgba(150, 90, 90, 1)"
+      : "rgba(140, 140, 140, 1)";
+    const outlineExtraWidth = 1.5;
+    const lineWidth = 1.25;
+    const lineDash = [8, 4];
+
+    context.save();
+    context.beginPath();
+    context.moveTo(srcX + offsetX, srcY + offsetY);
+    context.lineTo(dstX + offsetX, dstY + offsetY);
+    context.lineWidth = lineWidth + outlineExtraWidth;
+    context.setLineDash([
+      lineDash[0] + outlineExtraWidth,
+      Math.max(lineDash[1] - outlineExtraWidth, 0),
+    ]);
+    context.lineDashOffset = outlineExtraWidth / 2;
+    context.strokeStyle = outlineColor;
+    context.stroke();
+    context.lineWidth = lineWidth;
+    context.setLineDash(lineDash);
+    context.lineDashOffset = 0;
+    context.strokeStyle = lineColor;
+    context.stroke();
+
+    if (samInterceptX !== null && samInterceptY !== null) {
+      const XSize = 6;
+      const XLineWidth = 2;
+      context.beginPath();
+      context.moveTo(samInterceptX - XSize, samInterceptY - XSize);
+      context.lineTo(samInterceptX + XSize, samInterceptY + XSize);
+      context.moveTo(samInterceptX - XSize, samInterceptY + XSize);
+      context.lineTo(samInterceptX + XSize, samInterceptY - XSize);
+      context.lineWidth = XLineWidth + outlineExtraWidth;
+      context.setLineDash([]);
+      context.strokeStyle = "rgba(0, 0, 0, 1)";
+      context.stroke();
+      context.lineWidth = XLineWidth;
+      context.strokeStyle = "rgba(255, 0, 0, 1)";
+      context.stroke();
+    }
+
+    if (ghostStructure === UnitType.CarpetBomber) {
+      const lineLength = this.game.config().carpetBombLineLength();
+      const spacing = this.game.config().carpetBombSpacing();
+      const radius = this.game.config().carpetBombRadius();
+      const overshoot = lineLength / 2;
+      const endBX = dstX + (dx / dist) * overshoot;
+      const endBY = dstY + (dy / dist) * overshoot;
+      const totalBLen = Math.sqrt((endBX - srcX) ** 2 + (endBY - srcY) ** 2);
+      const bombStartDist = Math.max(0, totalBLen - lineLength);
+      const stepX = dx / dist;
+      const stepY = dy / dist;
+      context.setLineDash([]);
+      context.lineWidth = 1;
+      context.strokeStyle = "rgba(255, 255, 255, 0.7)";
+      for (let d = bombStartDist; d <= totalBLen + 0.5; d += spacing) {
+        const bx = srcX + stepX * d + offsetX;
+        const by = srcY + stepY * d + offsetY;
+        context.beginPath();
+        context.arc(bx, by, radius, 0, 2 * Math.PI);
+        context.stroke();
+      }
+    }
+
     context.restore();
   }
 }

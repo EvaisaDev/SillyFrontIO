@@ -10,8 +10,8 @@ import type { GameView, UnitView } from "../../../core/game/GameView";
 import { MoveWarshipIntentEvent } from "../../Transport";
 import { TransformHandler } from "../TransformHandler";
 import { MoveIndicatorUI } from "../ui/MoveIndicatorUI";
-import { NavalTarget } from "../ui/NavalTarget";
-import { NukeTelegraph } from "../ui/NukeTelegraph";
+import { NavalTarget, ParatrooperTarget } from "../ui/NavalTarget";
+import { CarpetBomberTelegraph, NukeTelegraph } from "../ui/NukeTelegraph";
 import { TextIndicator } from "../ui/TextIndicator";
 import { UIElement } from "../ui/UIElement";
 import { Layer } from "./Layer";
@@ -112,6 +112,14 @@ export class DynamicUILayer implements Layer {
         this.onTransportShipEvent(unit);
         break;
       }
+      case UnitType.CarpetBomber: {
+        this.onCarpetBomberEvent(unit);
+        break;
+      }
+      case UnitType.Paratrooper: {
+        this.onParatrooperEvent(unit);
+        break;
+      }
     }
   }
 
@@ -138,6 +146,32 @@ export class DynamicUILayer implements Layer {
       const target = new NavalTarget(this.transformHandler, this.game, unit);
       this.uiElements.push(target);
     }
+  }
+
+  onCarpetBomberEvent(unit: UnitView) {
+    const myPlayer = this.game.myPlayer();
+    if (!myPlayer) return;
+    if (!this.createdThisTick(unit)) return;
+    const target = new CarpetBomberTelegraph(
+      this.transformHandler,
+      this.game,
+      unit,
+    );
+    this.uiElements.push(target);
+  }
+
+  onParatrooperEvent(unit: UnitView) {
+    const myPlayer = this.game.myPlayer();
+    if (!myPlayer) return;
+    if (!this.createdThisTick(unit)) return;
+    const tile = unit.targetTile();
+    if (tile === undefined) return;
+    const target = new ParatrooperTarget(
+      this.transformHandler,
+      this.game,
+      unit,
+    );
+    this.uiElements.push(target);
   }
 
   renderLayer(context: CanvasRenderingContext2D) {

@@ -129,3 +129,24 @@ export class NavalTarget extends Target {
     return super.render(ctx, delta);
   }
 }
+
+export class ParatrooperTarget extends Target {
+  constructor(
+    transformHandler: TransformHandler,
+    readonly game: GameView,
+    private unit: UnitView,
+  ) {
+    const tile = unit.targetTile();
+    if (tile === undefined) {
+      throw new Error("ParatrooperTarget requires a target tile");
+    }
+    super(transformHandler, game.x(tile), game.y(tile), 10);
+  }
+
+  render(ctx: CanvasRenderingContext2D, delta: number): boolean {
+    if (!this.ended && !this.unit.isActive()) {
+      this.ended = true;
+    }
+    return super.render(ctx, delta);
+  }
+}

@@ -206,6 +206,21 @@ export class DefaultConfig implements Config {
   SiloCooldown(): number {
     return 75;
   }
+  AirportCooldown(): number {
+    return 100;
+  }
+  airplaneSpeed(): number {
+    return 5;
+  }
+  carpetBombRadius(): number {
+    return 4;
+  }
+  carpetBombSpacing(): number {
+    return 12;
+  }
+  carpetBombLineLength(): number {
+    return 40;
+  }
 
   defensePostRange(): number {
     return 30;
@@ -446,6 +461,26 @@ export class DefaultConfig implements Config {
           ),
           constructionDuration: this.instantBuild() ? 0 : 2 * 10,
           upgradable: true,
+        };
+        break;
+      case UnitType.Airport:
+        info = {
+          cost: this.costWrapper(
+            (numUnits: number) => Math.min(2_000_000, (numUnits + 1) * 750_000),
+            UnitType.Airport,
+          ),
+          constructionDuration: this.instantBuild() ? 0 : 8 * 10,
+          upgradable: true,
+        };
+        break;
+      case UnitType.CarpetBomber:
+        info = {
+          cost: this.costWrapper(() => 500_000, UnitType.CarpetBomber),
+        };
+        break;
+      case UnitType.Paratrooper:
+        info = {
+          cost: () => 0n,
         };
         break;
       case UnitType.Train:

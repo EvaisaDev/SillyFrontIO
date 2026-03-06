@@ -290,6 +290,28 @@ export class SAMLauncherExecution implements Execution {
       }
     }
 
+    if (target === null && mirvWarheadTargets.length === 0) {
+      const range = this.mg.config().samRange(this.sam.level());
+      const planeTargets = this.mg.nearbyUnits(
+        this.sam.tile(),
+        range,
+        [UnitType.CarpetBomber, UnitType.Paratrooper],
+        ({ unit }) => {
+          return (
+            isUnit(unit) &&
+            unit.owner() !== this.player &&
+            !this.player.isFriendly(unit.owner()) &&
+            !unit.targetedBySAM()
+          );
+        },
+      );
+      if (planeTargets.length > 0) {
+        planeTargets.sort((a, b) => a.distSquared - b.distSquared);
+        const closest = planeTargets[0];
+        target = { unit: closest.unit, tile: closest.unit.tile() };
+      }
+    }
+
     // target is already filtered to exclude nukes targeted by other SAMs
     if (target || mirvWarheadTargets.length > 0) {
       this.sam.launch();
