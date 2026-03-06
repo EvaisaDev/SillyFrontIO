@@ -137,6 +137,7 @@ export enum GameMapType {
   Alps = "Alps",
   NileDelta = "Nile Delta",
   Arson = "Arson",
+  Xytio = "Xytio",
 }
 
 export type GameMapName = keyof typeof GameMapType;
@@ -204,6 +205,7 @@ export const mapCategories: Record<string, GameMapType[]> = {
     GameMapType.TradersDream,
     GameMapType.Passage,
     GameMapType.Arson,
+    GameMapType.Xytio,
   ],
   arcade: [
     GameMapType.TheBox,
